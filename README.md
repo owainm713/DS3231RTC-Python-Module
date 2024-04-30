@@ -4,7 +4,8 @@ Python 3.x to use with the DS3231 RTC (Real Time Clock). Testing done with a DS3
  board from Adafuit and a Raspberry Pi3.
 
 created Nov 8, 2022
-modified NOv 8, 2022
+modified N0v 8, 2022
+modified Apr 29, 2024 - added get_alarm1, get_alarm2 functions
 
 This uses i2C and requires the smbus python library.
 
@@ -30,6 +31,8 @@ Current functions include:
 - change_clock_format(clockFormat = '12') -function to change the clock format ('12' or '24' hr) without having to reset the clock's time
 - get_time() - returns a tuple with the time in format (hours, minutes, seconds, amPM) 
 - get_date() - returns a tuple with the date in format (dayInMonth, month, year, centuryFlag, dow)
+- get_alarm1() - returns a tuple with the alarm data in format (hours, minutes, seconds, amPM, dtdyType, dtdy, [a1m1, a1m2, a1m3, a1m4])
+- get_alarm2() - returns a tuple with the alarm data in format ((hours, minutes, amPM, dtdyType, dtdy, [a1m2, a1m3, a1m4])
 - get_status() - return a tuple with various status flags in format (A1F, A2F, BSY, OSF)
 - get_temperature() - returns the temperature, in Celcius, from the onboard temperature sensor
 - clear_status() - function to clear the status flags in the status register (0x0F)
