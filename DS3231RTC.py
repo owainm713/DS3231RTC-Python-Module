@@ -3,10 +3,11 @@
 clock)
 
 created October 22, 2022
-last modified October 25, 2022"""
+modified October 25, 2022
+modified February 12, 2024 - added get_alarm1 and get_alarm2 functions"""
 
 """
-Copyright 2022 Owain Martin
+Copyright 2022, 2024 Owain Martin
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -336,6 +337,81 @@ class DS3231:
         
         return (dayInMonth, month, year, centuryFlag, dow)
 
+    def get_alarm1(self):
+        """get_alarm1, function to return the time stored in the alarm1
+        registers 0x07 to 0x0A. Data is stored in binary coded deciaml (BCD)"""
+
+        timeBytes = self.multi_access_read_i2c(0x07, 3)
+
+        seconds = ((timeBytes[0] & 0x70)>>4)*10 + (timeBytes[0] & 0x0F)
+        minutes = ((timeBytes[1] & 0x70)>>4)*10 + (timeBytes[1] & 0x0F)
+        hourFlag = (timeBytes[2] & 0x40)>>6
+
+        if hourFlag == 1:
+            # 12hr mode
+            if (timeBytes[2] & 0x20)>>5 == 1:
+                amPM = 'PM'
+            else:
+                amPM = 'AM'
+            
+            hours = ((timeBytes[2] & 0x10)>>4)*10 + (timeBytes[2] & 0x0F)            
+        else:
+            # 24hr mode         
+            hours = ((timeBytes[2] & 0x30)>>4)*10 + (timeBytes[2] & 0x0F)
+            amPM = None
+            
+        a1m1 = (timeBytes[0] & 0x80)>>7
+        a1m2 = (timeBytes[1] & 0x80)>>7
+        a1m3 = (timeBytes[2] & 0x80)>>7
+            
+        dateByte = self.single_access_read_i2c(0xA)        
+        a1m4 = (dateByte & 0x80) >> 7
+        dateBit = (dateByte & 0x40) >> 6
+        if dateBit == 0:            
+            dtdyType = 'DATE'
+            dtdy = ((dateByte & 0x30)>>4)*10 + (dateByte & 0x0F)
+        else:
+            dtdyType = 'DAY'
+            dtdy = dateByte & 0x0F        
+            
+        return (hours, minutes, seconds, amPM, dtdyType, dtdy, [a1m1, a1m2, a1m3, a1m4])
+
+    def get_alarm2(self):
+        """get_alarm2, function to return the time stored in the alarm1
+        registers 0x0B to 0x0D. Data is stored in binary coded deciaml (BCD)"""
+
+        timeBytes = self.multi_access_read_i2c(0x0B, 2)
+        
+        minutes = ((timeBytes[0] & 0x70)>>4)*10 + (timeBytes[0] & 0x0F)
+        hourFlag = (timeBytes[1] & 0x40)>>6
+        
+        if hourFlag == 1:
+            # 12hr mode
+            if (timeBytes[1] & 0x20)>>5 == 1:
+                amPM = 'PM'
+            else:
+                amPM = 'AM'
+            
+            hours = ((timeBytes[1] & 0x10)>>4)*10 + (timeBytes[1] & 0x0F)            
+        else:
+            # 24hr mode         
+            hours = ((timeBytes[1] & 0x30)>>4)*10 + (timeBytes[1] & 0x0F)
+            amPM = None
+            
+        a1m2 = (timeBytes[0] & 0x80)>>7
+        a1m3 = (timeBytes[1] & 0x80)>>7        
+            
+        dateByte = self.single_access_read_i2c(0xD)        
+        a1m4 = (dateByte & 0x80) >> 7
+        dateBit = (dateByte & 0x40) >> 6
+        if dateBit == 0:            
+            dtdyType = 'DATE'
+            dtdy = ((dateByte & 0x30)>>4)*10 + (dateByte & 0x0F)
+        else:
+            dtdyType = 'DAY'
+            dtdy = dateByte & 0x0F        
+            
+        return (hours, minutes, amPM, dtdyType, dtdy, [a1m2, a1m3, a1m4])
 
     def get_status(self):
         """get_status, function to read the status register 0x0F and return the
