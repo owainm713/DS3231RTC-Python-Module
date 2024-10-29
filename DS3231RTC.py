@@ -4,7 +4,8 @@ clock)
 
 created October 22, 2022
 modified October 25, 2022
-modified February 12, 2024 - added get_alarm1 and get_alarm2 functions"""
+modified February 12, 2024 - added get_alarm1 and get_alarm2 functions
+modified October 29, 2024 - corrected change_clock_format i2c function call"""
 
 """
 Copyright 2022, 2024 Owain Martin
@@ -293,7 +294,7 @@ class DS3231:
             regValue = (amPMBit<<5) + ((hour//10)<<4) + (hour%10)    
         
         regValue =  (clockFormatBit<<6) + regValue    
-        self.single_access_write_i2c(reg=0x2, regValue = regValue)
+        self.single_access_write(reg=0x2, regValue = regValue)
 
         return
 
